@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat Records</title>
+    <style>
+        .scrollable-table {
+            height: 400px;
+            overflow-y: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+        }
+        #chat-display {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            height: 600px; /* Adjust height as needed */
+            overflow-y: auto; /* Make the chat box scrollable if content is long */
+        }
+    </style>
+</head>
+<body>
+    <h1>Chat Records</h1>
+    <div class="scrollable-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>User Name</th>
+                    <th>Title</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for chat in chats %}
+                    <tr>
+                        <td><a href="#" onclick="loadChat('{{ chat.id }}'); return false;">{{ chat.id }}</a></td>
+                        <td>{{ chat.user_name }}</td>
+                        <td>{{ chat.title }}</td>
+                        <td>{{ chat.timestamp }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div id="chat-display">Click on a chat ID to view the conversation here.</div>
+
+    <script>
+        function loadChat(chatId) {
+            fetch(`/chat/${chatId}`)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('chat-display').innerHTML = html;
+                })
+                .catch(error => console.error('Error loading the chat:', error));
+        }
+    </script>
+</body>
+</html>
