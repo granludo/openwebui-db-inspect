@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  web:
+    build: .
+    ports:
+      - "4444:5000"  # Maps port 5000 in the container to port 4444 on the host
+    environment:
+      - DATABASE_PATH=/data/webui.db
+    volumes:
+      - ./data:/data  # Maps the 'data' directory on the host to '/data' in the container
+    restart: on-failure

@@ -13,6 +13,15 @@ def get_db_connection():
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
     return conn
+
+def get_unique_models():
+    conn = get_db_connection()
+    query = "SELECT DISTINCT json_each.value as model FROM chat, json_each(chat, '$.models')"
+    models = conn.execute(query).fetchall()
+    conn.close()
+    return [model['model'] for model in models]
+
+
 @app.route('/')
 def index():
     start_date = request.args.get('start_date')
