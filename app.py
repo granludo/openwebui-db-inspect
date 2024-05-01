@@ -5,12 +5,32 @@ from flask_httpauth import HTTPBasicAuth
 import json 
 import markdown
 import os 
+import logging
 
+# Set up logging configuration
+logging.basicConfig(level=logging.INFO, filename='app.log', filemode='a',
+                    format='%(name)s - %(levelname)s - %(message)s')
 
-DATABASE = os.getenv('DATABASE_PATH', 'webui.db')
+## DATABASE = os.getenv('DATABASE_PATH', 'webui.db')
 ADMIN_USERNAME = os.getenv('ADMIN_USERNAME', 'llmentor')
 ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'llmprimer')
 
+DATABASE = 'webui.db'
+
+# Set up logging configuration
+logging.basicConfig(level=logging.INFO, filename='app.log', filemode='a',
+                    format='%(name)s - %(levelname)s - %(message)s')
+
+def get_db_connection():
+    try:
+        # Using a context manager to ensure that resources are cleaned up properly
+        with sqlite3.connect(DATABASE) as conn:
+            conn.row_factory = sqlite3.Row
+            logging.info("Database connection successfully established")
+            return conn
+    except sqlite3.Error as e:
+        logging.error(f"Failed to connect to the database: {e}")
+        raise  # Optionally re-raise the exception after logging
 
 auth = HTTPBasicAuth()
 
@@ -26,12 +46,9 @@ def verify_password(username, password):
 
 app = Flask(__name__)
 
-DATABASE = 'webui.db'
 
-def get_db_connection():
-    conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row
-    return conn
+
+
 
 def get_unique_models():
     conn = get_db_connection()

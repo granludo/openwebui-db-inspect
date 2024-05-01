@@ -5,7 +5,8 @@ services:
     ports:
       - "4444:5000"  # Maps port 5000 in the container to port 4444 on the host
     environment:
-      - DATABASE_PATH=/data/webui.db
+      - DATABASE_PATH=/data/db.sqlite  # Sets the DATABASE_PATH environment variable
     volumes:
       - ./data:/data  # Maps the 'data' directory on the host to '/data' in the container
-    restart: on-failure
+    restart: always
+    command: bash -c "ls -la /data && flask run --host=0.0.0.0"
