@@ -1,21 +1,32 @@
 from datetime import datetime
 import sqlite3
 from flask import Flask, render_template, request, redirect, url_for
-from flask_httpauth import HTTPBasicAuth
-import json 
+# from flask_httpauth import HTTPBasicAuth
+import json
 import markdown
-import os 
+import os
 import logging
 
 # Set up logging configuration
 logging.basicConfig(level=logging.INFO, filename='app.log', filemode='a',
                     format='%(name)s - %(levelname)s - %(message)s')
 
-## DATABASE = os.getenv('DATABASE_PATH', 'webui.db')
-ADMIN_USERNAME = os.getenv('ADMIN_USERNAME', 'llmentor')
-ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'llmprimer')
-
 DATABASE = 'webui.db'
+
+# Commented out authentication setup
+# ADMIN_USERNAME = os.getenv('ADMIN_USERNAME', 'llmentor')
+# ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'llmprimer')
+
+# auth = HTTPBasicAuth()
+
+# users = {
+#     "llmentor": "llmprimer",  # You can replace 'admin' and 'password' with your desired credentials
+# }
+
+# @auth.verify_password
+# def verify_password(username, password):
+#     if username in users and users[username] == password:
+#         return username
 
 # Set up logging configuration
 logging.basicConfig(level=logging.INFO, filename='app.log', filemode='a',
@@ -31,18 +42,6 @@ def get_db_connection():
     except sqlite3.Error as e:
         logging.error(f"Failed to connect to the database: {e}")
         raise  # Optionally re-raise the exception after logging
-
-auth = HTTPBasicAuth()
-
-users = {
-    "llmentor": "llmprimer",  # You can replace 'admin' and 'password' with your desired credentials
-}
-
-@auth.verify_password
-def verify_password(username, password):
-    if username in users and users[username] == password:
-        return username
-
 
 app = Flask(__name__)
 
@@ -60,7 +59,7 @@ def get_unique_models():
 
 
 @app.route('/')
-@auth.login_required
+# @auth.login_required
 def index():
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
@@ -104,7 +103,7 @@ def index():
 
 
 @app.route('/chat/<id>')
-@auth.login_required
+# @auth.login_required
 def chat(id):
     conn = get_db_connection()
     chat_record = conn.execute('SELECT * FROM chat WHERE id = ?', (id,)).fetchone()
