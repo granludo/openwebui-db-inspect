@@ -1,6 +1,6 @@
 from datetime import datetime
 import sqlite3
-from flask import Flask, render_template, request  # Add 'request' to your imports
+from flask import Flask, render_template, request, redirect, url_for
 from flask_httpauth import HTTPBasicAuth
 import json 
 import markdown
@@ -77,7 +77,7 @@ def index():
     if start_date and end_date and start_time and end_time:
         start_datetime = datetime.strptime(f"{start_date} {start_time}", '%Y-%m-%d %H:%M')
         end_datetime = datetime.strptime(f"{end_date} {end_time}", '%Y-%m-%d %H:%M')
-        where_clauses.append("c.timestamp >= ? AND c.timestamp <= ?")
+        where_clauses.append("c.created_at >= ? AND c.created_at <= ?")
         parameters.extend([start_datetime.timestamp(), end_datetime.timestamp()])
 
     if model_name:
@@ -85,17 +85,17 @@ def index():
         parameters.append(f"%{model_name}%")
 
     if where_clauses:
-        query = f"SELECT c.id, c.title, c.timestamp, c.chat FROM chat c WHERE {' AND '.join(where_clauses)}"
+        query = f"SELECT c.id, c.title, c.created_at, c.chat FROM chat c WHERE {' AND '.join(where_clauses)}"
         chats = conn.execute(query, parameters).fetchall()
     else:
-        chats = conn.execute("SELECT c.id, c.title, c.timestamp, c.chat FROM chat c").fetchall()
+        chats = conn.execute("SELECT c.id, c.title, c.created_at, c.chat FROM chat c").fetchall()
     
     conn.close()
 
     processed_chats = [{
         'id': chat['id'],
         'title': chat['title'],
-        'timestamp': datetime.fromtimestamp(int(chat['timestamp'])).strftime('%Y-%m-%d %H:%M'),
+        'timestamp': datetime.fromtimestamp(int(chat['created_at'])).strftime('%Y-%m-%d %H:%M'),
         'models': ", ".join(json.loads(chat['chat']).get("models", []))
     } for chat in chats]
 
@@ -116,7 +116,7 @@ def chat(id):
         # Process each message to convert Markdown content to HTML
         for message in messages:
             message['content'] = markdown.markdown(message['content'])
-        return render_template('chat.html', title=chat_record['title'], messages=messages, timestamp=chat_record['timestamp'])
+        return render_template('chat.html', title=chat_record['title'], messages=messages, timestamp=chat_record['created_at'])
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
